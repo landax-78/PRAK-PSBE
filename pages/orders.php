@@ -1,0 +1,7 @@
+<?php
+require_once __DIR__.'/../includes/config.php'; require_customer(); $userId=(int)current_user()['id'];
+$ordersStmt=db()->prepare('SELECT * FROM orders WHERE user_id=? ORDER BY created_at DESC'); $ordersStmt->bind_param('i',$userId); $ordersStmt->execute(); $orders=$ordersStmt->get_result(); $ordersStmt->close();
+$pageTitle='Pesanan Saya'; require __DIR__.'/../includes/header.php';
+?>
+<section class="section container"><div class="section-head"><div><span class="eyebrow">Riwayat</span><h1>Pesanan Saya</h1></div></div><?php if($orders->num_rows===0): ?><div class="empty-state"><h3>Belum ada pesanan</h3><a class="btn btn-primary" href="<?= e(url('pages/products.php')) ?>">Mulai Belanja</a></div><?php else: ?><div class="table-wrap"><table class="table"><thead><tr><th>Invoice</th><th>Tanggal</th><th>Total</th><th>Pembayaran</th><th>Status</th><th></th></tr></thead><tbody><?php while($order=$orders->fetch_assoc()): ?><tr><td><strong><?= e($order['invoice_number']) ?></strong></td><td><?= e(date('d-m-Y H:i',strtotime($order['created_at']))) ?></td><td><?= rupiah($order['total_amount']) ?></td><td><?= e(strtoupper($order['payment_method'])) ?></td><td><span class="status status-<?= e($order['status']) ?>"><?= e(ucfirst($order['status'])) ?></span></td><td><a href="<?= e(url('pages/order_detail.php?id='.$order['id'])) ?>">Detail</a></td></tr><?php endwhile; ?></tbody></table></div><?php endif; ?></section>
+<?php require __DIR__.'/../includes/footer.php'; ?>
